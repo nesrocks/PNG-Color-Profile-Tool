@@ -2,8 +2,6 @@ function Init()
 {
 	midx = room_width/2;
 	
-	GenASCII();
-	
 	Initlists(true);
 	
 	Run();
@@ -95,10 +93,10 @@ function CheckFile(path, filename)
 		byte = file_bin_read_byte(file);
 		chunklen += byte;
 		
-		chunkname = hextoascii(file_bin_read_byte(file));
-		chunkname += hextoascii(file_bin_read_byte(file));
-		chunkname += hextoascii(file_bin_read_byte(file));
-		chunkname += hextoascii(file_bin_read_byte(file));
+		chunkname =  ansi_char(file_bin_read_byte(file));
+		chunkname += ansi_char(file_bin_read_byte(file));
+		chunkname += ansi_char(file_bin_read_byte(file));
+		chunkname += ansi_char(file_bin_read_byte(file));
 		
 		//show_debug_message(chunkname, chunklen);
 		
@@ -126,26 +124,11 @@ function CheckFile(path, filename)
 	return [hasiccp, iccpdata];
 }
 
-function dec_to_hex_cpuver(dec)
-{
-	var hex, h, byte, hi, lo;
-	if (dec) hex = "" else hex="00";
-	h = "0123456789ABCDEF";
-	while (dec) {
-	    byte = dec & $FF;
-	    hi = string_char_at(h, byte div 16 + 1);
-	    lo = string_char_at(h, byte mod 16 + 1);
-	    hex = hi + lo + hex;
-	    dec = dec >> 8;
-	}
-	return hex;
-}
-
 function TrimFile(file, offset, chunklen, path, filename)
 {
 	//file_bin_open(file, 0);
 	var size = file_bin_size(file);
-	var buff = buffer_create(size, buffer_u8, 1);
+	var buff = buffer_create(size, buffer_grow, 1);
 	buffer_seek(buff, buffer_seek_start, 0);
 	file_bin_seek(file, 0);
 	
@@ -166,41 +149,6 @@ function TrimFile(file, offset, chunklen, path, filename)
 	var fixname = path + "fixed (iCCP removed)/" + filename_name(filename);
 	buffer_save(buff, fixname);
 	buffer_delete(buff);
-}
-
-function hextoascii(hexbytes)
-{
-	hexbytes = clamp(hexbytes, 0, 255);
-	//show_debug_message(hexbytes);
-	//show_debug_message(chars3[hexbytes]);
-	return chars3[hexbytes];
-}
-
-function GenASCII()
-{
-	for (var i = 0; i < 32; i++)
-		chars[i] = "-";
-		
-	chars2 = [
-	" ", "!", " ", "#", "$" ,"%", "&",
-	"'", "(", ")", "*", "+" ," ", " ",
-	".", "/", "0", "1", "2" ,"3", "4",
-	"5", "6", "7", "8", "9" ,":", ";",
-	"<", "=", ">", "?", "@" ,"A", "B",
-	"C", "D", "E", "F", "G" ,"H", "I",
-	"J", "K", "L", "M", "N" ,"O", "P",
-	"Q", "R", "S", "T", "U" ,"V", "W",
-	"X", "Y", "Z", "[", " " ,"]", "^",
-	"_", "`", "a", "b", "c" ,"d", "e",
-	"f", "g", "h", "i", "j" ,"k", "l",
-	"m", "n", "o", "p", "q" ,"r", "s",
-	"t", "u", "v", "w", "x" ,"y", "z",
-	];
-
-	chars3 = array_concat(chars, chars2);
-	
-	for (var i = array_length(chars3); i < 256; i++)
-		chars3[i] = "-";
 }
 
 function Main()
